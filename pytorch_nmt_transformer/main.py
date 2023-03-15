@@ -26,8 +26,8 @@ def run(args):
     logger.info("Build vocab")
     special_symbols = ["<unk>", "<pad>", "<bos>", "<eos>"]
     pad_index = special_symbols.index("<pad>")
-    preprocessor = Preprocessor(dataset=dr, special_symbols=special_symbols)
-    preprocessor.build_vocab()
+    preprocessor = Preprocessor(special_symbols=special_symbols)
+    preprocessor.build_vocab(dataset=dr)
 
     logger.info("Create collate function for training")
     text_transforms = preprocessor.get_all_transforms()

@@ -63,11 +63,11 @@ def greedy_decode(
 
     ys = torch.ones(1, 1).fill_(start_symbol).type(torch.long).to(device)
 
-    for i in range(max_len - 1):
+    for _ in range(max_len - 1):
         memory = memory.to(device)
-        target_mask = (generate_square_subsequent_mask(ys.size(0)).type(torch.bool)).to(
-            device
-        )
+        target_mask = (
+            generate_square_subsequent_mask(ys.size(0), device=device).type(torch.bool)
+        ).to(device)
 
         out = model.decode(ys, memory, target_mask)
         out = out.transpose(0, 1)
@@ -78,9 +78,4 @@ def greedy_decode(
         ys = torch.cat([ys, torch.ones(1, 1).type_as(src.data).fill_(next_word)], dim=0)
         if next_word == end_symbol:
             break
-
-        if i == 0:
-            logger.info(
-                f"src type: {type(src)}, src_mask type: {type(src_mask)}, memory type: {type(memory)}, out type: {type(out)}, next word type: {type(next_word)}"
-            )
     return ys

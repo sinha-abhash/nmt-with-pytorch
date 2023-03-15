@@ -9,8 +9,7 @@ from pytorch_nmt_transformer import config
 
 
 class Preprocessor:
-    def __init__(self, dataset: Dataset, special_symbols: List[str]) -> None:
-        self.dataset = dataset
+    def __init__(self, special_symbols: List[str]) -> None:
         self.special_symbols = special_symbols
 
         self.tokenizers = Preprocessor.get_tokenizers()
@@ -27,15 +26,15 @@ class Preprocessor:
             config.TARGET_LANG: get_tokenizer("spacy", language="en_core_web_sm"),
         }
 
-    def yield_tokens(self, language: str):
+    def yield_tokens(self, dataset: Dataset, language: str):
         language_index = {config.SOURCE_LANG: 0, config.TARGET_LANG: 1}
-        for data in self.dataset:
+        for data in dataset:
             yield self.tokenizers[language](data[language_index[language]])
 
-    def build_vocab(self):
+    def build_vocab(self, dataset: Dataset):
         for lang in [config.SOURCE_LANG, config.TARGET_LANG]:
             self.vocab_transforms[lang] = build_vocab_from_iterator(
-                self.yield_tokens(lang),
+                self.yield_tokens(dataset, lang),
                 min_freq=1,
                 specials=self.special_symbols,
                 special_first=True,
