@@ -49,29 +49,22 @@ def create_mask(
 def greedy_decode(
     model: Seq2SeqTransformer,
     src: Tensor,
-    src_mask: Tensor,
     max_len: int,
     start_symbol: int,
     end_symbol: int,
     device: torch.device,
 ):
-    logger = logging.getLogger("greedy_decode")
     src = src.to(device)
-    src_mask = src_mask.to(device)
 
-    memory = model.encode(src, src_mask)
+    memory = model.encode(src)
 
     ys = torch.ones(1, 1).fill_(start_symbol).type(torch.long).to(device)
 
     for _ in range(max_len - 1):
         memory = memory.to(device)
-        target_mask = (
-            generate_square_subsequent_mask(ys.size(0), device=device).type(torch.bool)
-        ).to(device)
-
-        out = model.decode(ys, memory, target_mask)
+        out = model.decode(ys, memory)
         out = out.transpose(0, 1)
-        prob = model.generator(out[:, -1])
+        prob = out[:, -1]
         _, next_word = torch.max(prob, dim=1)
         next_word = next_word.item()
 

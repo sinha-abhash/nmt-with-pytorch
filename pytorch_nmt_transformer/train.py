@@ -46,19 +46,7 @@ class Trainer:
 
             target_input = target[:-1, :]
 
-            src_mask, target_mask, src_padding_mask, target_padding_mask = create_mask(
-                src, target_input, device=self.device, pad_index=self.pad_index
-            )
-
-            logits = self.model(
-                src,
-                target_input,
-                src_mask,
-                target_mask,
-                src_padding_mask,
-                target_padding_mask,
-                src_padding_mask,
-            )
+            logits = self.model(src, target_input)
 
             self.optimizer.zero_grad()
             target_out = target[1:, :]
@@ -85,19 +73,8 @@ class Trainer:
             target = target.to(self.device)
 
             target_input = target[:-1, :]
-            src_mask, target_mask, src_padding_mask, target_padding_mask = create_mask(
-                src, target_input, self.pad_index, self.device
-            )
 
-            logits = self.model(
-                src,
-                target_input,
-                src_mask,
-                target_mask,
-                src_padding_mask,
-                target_padding_mask,
-                src_padding_mask,
-            )
+            logits = self.model(src, target_input)
 
             target_out = target[1:, :]
             loss = self.loss_fn(

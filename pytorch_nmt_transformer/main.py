@@ -11,11 +11,17 @@ from torch.optim import Adam
 from pytorch_nmt_transformer import config
 from pytorch_nmt_transformer.data import DataReader, Preprocessor
 from pytorch_nmt_transformer.helper import collate_fn
-from pytorch_nmt_transformer.model import Seq2SeqTransformer
+from pytorch_nmt_transformer.model import SelfImplementedTransformer as Transformer
 from pytorch_nmt_transformer.train import Trainer
 
 
 logging.basicConfig(level=logging.INFO)
+
+
+def load_vocab(file_path: str):
+    with open(file_path, "rb") as fout:
+        model = pickle.load(fout)
+    return model
 
 
 def run(args):
@@ -27,7 +33,21 @@ def run(args):
     special_symbols = ["<unk>", "<pad>", "<bos>", "<eos>"]
     pad_index = special_symbols.index("<pad>")
     preprocessor = Preprocessor(special_symbols=special_symbols)
-    preprocessor.build_vocab(dataset=dr)
+    # preprocessor.build_vocab(dataset=dr)
+
+    # with open(
+    #     "./pytorch_nmt_transformer/saved_models/text_transformer.pickle", "wb"
+    # ) as text_transform_pickle:
+    #     pickle.dump(
+    #         preprocessor.vocab_transforms,
+    #         text_transform_pickle,
+    #         protocol=pickle.HIGHEST_PROTOCOL,
+    #     )
+
+    vocab_transform = load_vocab(
+        file_path="./pytorch_nmt_transformer/saved_models/text_transformer.pickle"
+    )
+    preprocessor.vocab_transforms = vocab_transform
 
     logger.info("Create collate function for training")
     text_transforms = preprocessor.get_all_transforms()
@@ -42,14 +62,14 @@ def run(args):
 
     logger.info("Create Model")
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    transformer = Seq2SeqTransformer(
-        num_encoders=config.NUM_LAYERS,
-        num_decoders=config.NUM_LAYERS,
-        emb_size=config.EMB_SIZE,
-        num_head=config.NHEAD,
-        src_vocab_size=src_vocab_size,
+    transformer = Transformer(
+        num_layers=config.NUM_LAYERS,
+        d_model=config.EMB_SIZE,
+        num_heads=config.NHEAD,
+        input_vocab_size=src_vocab_size,
         target_vocab_size=target_vocab_size,
-        ff_dim=config.FFN_HID_DIM,
+        dff=config.FFN_HID_DIM,
+        device=DEVICE,
     )
     for p in transformer.parameters():
         if p.dim() > 1:
@@ -81,15 +101,6 @@ def run(args):
     torch.save(
         transformer.state_dict(), "./pytorch_nmt_transformer/saved_models/model.ph"
     )
-
-    with open(
-        "./pytorch_nmt_transformer/saved_models/text_transformer.pickle", "wb"
-    ) as text_transform_pickle:
-        pickle.dump(
-            preprocessor.vocab_transforms,
-            text_transform_pickle,
-            protocol=pickle.HIGHEST_PROTOCOL,
-        )
 
     logger.info("Models Saved")
 

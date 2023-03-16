@@ -8,12 +8,11 @@ packages = [{include = "pytorch_nmt_transformer"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-torch = "^1.13.1"
-torchvision = "^0.14.1"
-torchaudio = "^0.13.1"
+torch = "^2.0.0"
+torchvision = "^0.15.1"
 numpy = "^1.24.2"
-torchtext = "^0.14.1"
-torchdata = "^0.5.1"
+torchtext = "^0.15.0"
+torchdata = "^0.6.0"
 spacy = "^3.5.0"
 en_core_web_sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz" }
 de_core_news_sm = { url = "https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.5.0/de_core_news_sm-3.5.0.tar.gz" }

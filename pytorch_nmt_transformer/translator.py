@@ -27,11 +27,9 @@ class Translator:
 
         src = self.text_transform[config.SOURCE_LANG](src_text).view(-1, 1)
         num_tokens = src.shape[0]
-        src_mask = (torch.zeros(num_tokens, num_tokens)).type(torch.bool)
         target_tokens = greedy_decode(
             model=self.model,
             src=src,
-            src_mask=src_mask,
             max_len=num_tokens + 5,
             start_symbol=self.bos_index,
             end_symbol=self.eos_index,

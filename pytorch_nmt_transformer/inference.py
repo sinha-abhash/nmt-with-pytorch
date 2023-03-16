@@ -6,7 +6,7 @@ import pickle
 import torch
 
 from pytorch_nmt_transformer.data import Preprocessor
-from pytorch_nmt_transformer.model import Seq2SeqTransformer
+from pytorch_nmt_transformer.model import SelfImplementedTransformer
 from pytorch_nmt_transformer import config
 from pytorch_nmt_transformer.translator import Translator
 
@@ -42,16 +42,16 @@ def load_vocab(file_path: str):
 
 
 def load_model(
-    file_path: str, src_vocab_size: int, target_vocab_size: int
-) -> Seq2SeqTransformer:
-    model_class = Seq2SeqTransformer(
-        num_encoders=config.NUM_LAYERS,
-        num_decoders=config.NUM_LAYERS,
-        emb_size=config.EMB_SIZE,
-        num_head=config.NHEAD,
-        src_vocab_size=src_vocab_size,
+    file_path: str, src_vocab_size: int, target_vocab_size: int, DEVICE
+) -> SelfImplementedTransformer:
+    model_class = SelfImplementedTransformer(
+        num_layers=config.NUM_LAYERS,
+        d_model=config.EMB_SIZE,
+        num_heads=config.NHEAD,
+        input_vocab_size=src_vocab_size,
         target_vocab_size=target_vocab_size,
-        ff_dim=config.FFN_HID_DIM,
+        dff=config.FFN_HID_DIM,
+        device=DEVICE,
     )
 
     model_class.load_state_dict(torch.load(file_path))
@@ -81,6 +81,7 @@ def infer(args):
         file_path=f"{args.model_path}/model.ph",
         src_vocab_size=src_vocab_size,
         target_vocab_size=target_vocab_size,
+        DEVICE=DEVICE,
     )
     model = model.to(DEVICE)
 
